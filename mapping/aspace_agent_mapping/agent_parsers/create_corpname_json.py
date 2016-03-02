@@ -82,4 +82,4 @@ def split_into_component_entities(string):
     # replace "No."
     parts = [name.replace("$$number$$", "no. ") for name in parts]
 
-    return [name.strip(". ") for name in extract_names_from_split_components(parts)]
+    return [name.strip() for name in extract_names_from_split_components(parts)]

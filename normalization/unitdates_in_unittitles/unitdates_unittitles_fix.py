@@ -7,20 +7,23 @@ from lxml import etree
 from tqdm import tqdm
 
 
-input_dir = r'C:\Users\djpillen\GitHub\without-reservations\Real_Masters_all'
-output_dir = r'C:\Users\djpillen\GitHub\without-reservations\Real_Masters_all'
+input_dir = r"C:\Users\djpillen\GitHub\archivesspace_migration\eads"
+output_dir = r"C:\Users\djpillen\GitHub\archivesspace_migration\eads"
 
 
 def grab_suspects(input_dir):
     eads = [ead for ead in os.listdir(input_dir) if ead.endswith(".xml")]
     tag_regex = r"\<\/?.*?\>"
-
+    clean_total = 0
+    calcify_total = 0
     data = []
     for ead in tqdm(eads):
         tree = etree.parse(os.path.join(input_dir, ead))
         unittitles = tree.xpath("//did/unittitle")
         for unittitle in unittitles:
-            action = determine_action(unittitle)
+            action, clean, calcify = determine_action(unittitle)
+            clean_total += clean
+            calcify_total += calcify
             if action:
                 text_with_tags = " ".join(etree.tostring(unittitle).split()).strip()
                 text_without_tags = " ".join(re.sub(tag_regex, "", text_with_tags).split()).strip()
@@ -30,6 +33,9 @@ def grab_suspects(input_dir):
         writer = csv.writer(f)
         writer.writerows(data)
         print(len(data))
+
+    print "Clean: {0}".format(clean_total)
+    print "Calcify: {0}".format(calcify_total)
 
 
 def fix_suspects(input_dir, output_dir):
@@ -73,19 +79,24 @@ def determine_action(unittitle):
     # characterize the distribution of unitdates in the unittitle, and decide on which course of action to take
     unitdates = unittitle.xpath("unitdate")
     action = ""
+    clean = 0
+    calcify = 0
     if unitdates:
         for unitdate in unitdates:
             if unitdate.tail:
                 if len(unitdate.tail.strip(", 1234567890-")) > 5 and len(unitdates) > 1:
                     action = "move_and_calcify"
+                    calcify += 1
                 elif any([unitdate.tail.strip() == candidate for candidate in [",", "and", ", and"]]):
                     tails = [unitdate.tail if unitdate.tail else "" for unitdate in unitdates]
                     if all([len(tail.strip(" and,.")) == 0 for tail in tails]):
                         action = "move_and_clean"
+                        clean += 1
     if unitdates and not action:
         action = "move_and_clean"
+        clean += 1
 
-    return action
+    return action, clean, calcify
 
 
 def find_date_disparity(unittitle):

@@ -19,6 +19,18 @@ def post_agents_and_record_ids(agent_dict, host, username, password):
 
     return name_to_aspace_ids_map
 
+def post_donors_and_record_ids(agent_dict, host, username, password):
+    name_to_aspace_ids_map = {}
+    pyspace = PySpace(host=host, username=username, password=password)
+
+    for agent_type, agent_dct in agent_dict.items():
+        for name, json_data in tqdm(agent_dct.items(), desc="posting {}s...".format(agent_type)):
+            aspace_agent_type = normalize_agent_type(agent_type)
+            contact_id = json.loads(json_data)["donor_details"][0]["beal_contact_id"]
+            response = post_agent(pyspace, json_data, aspace_agent_type)
+            name_to_aspace_ids_map[contact_id] = unicode(extract_aspace_id(json_data, response, pyspace))
+
+    return name_to_aspace_ids_map
 
 def extract_aspace_id(original_json, returned_json, pyspace):
     aspace_id = ""

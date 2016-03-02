@@ -5,13 +5,13 @@ import nameparser
 from tqdm import tqdm
 from mapping.aspace_agent_mapping.agent_parsers.Corpname import Corpname
 from mapping.aspace_agent_mapping.agent_parsers.Persname import Persname
-from mapping.aspace_agent_mapping.scripts.post_agents import post_agents_and_record_ids
+from mapping.aspace_agent_mapping.scripts.post_agents import post_donors_and_record_ids
 
 
 def main():
     print("loading data...")
-    convert_to_utf8_and_add_headers("donor_records.tab")
-    donor_data = load_donor_data("donor_records_clean.tab")\
+    convert_to_utf8_and_add_headers("C:/Users/djpillen/GitHub/accessions/donor_records.tab")
+    donor_data = load_donor_data("C:/Users/djpillen/GitHub/accessions/donor_records_clean.tab")
 
     print("extracting donors...")
     person_donor_data, corp_donor_data = extract_agents(donor_data)
@@ -34,11 +34,10 @@ def main():
         corp_json.update(get_donor_details(corp))
         agent_dict["corpname"][name] = json.dumps(corp_json)
 
-    ids = post_agents_and_record_ids(agent_dict, host="http://localhost:8089", username="admin", password="admin")
+    ids = post_donors_and_record_ids(agent_dict, host="http://localhost:8089", username="admin", password="admin")
 
     with open("donor_name_to_aspace_id_map.json", mode="w") as f:
         json.dump(ids, f, ensure_ascii=False, indent=4, sort_keys=True)
-
 
 def get_donor_details(donor_data):
     donor_number = donor_data.get("donor number", "")

@@ -6,17 +6,24 @@ from tqdm import tqdm
 
 def main():
     # CHANGE THIS
-    input_filepath = "accessions_20160208-final.csv"
+    input_filepath = "C:/Users/djpillen/GitHub/accessions/accessions_20160226-final.csv"
+
+    donornumberid_to_contactid_filepath = 'C:/Users/djpillen/GitHub/accessions/DonorNumberID_to_ContactID.csv'
+    donornumberid_to_contactid_map = make_donornumberid_to_contactid_map(donornumberid_to_contactid_filepath)
+
+    contactid_to_aspace_id_filepath = 'C:/Users/djpillen/GitHub/bentley_code/mapping/aspace_agent_mapping/donor_name_to_aspace_id_map.json'
+
+    donornumberid_to_aspace_id_map = make_donornumberid_to_aspace_id_map(donornumberid_to_contactid_map, contactid_to_aspace_id_filepath)
 
     clean_filename = convert_input_file_to_utf8(input_filepath)
 
-    json_data = make_accession_json_list(clean_filename)
+    json_data = make_accession_json_list(clean_filename, donornumberid_to_aspace_id_map)
 
     with open("json_data.json", mode="w") as f:
-        f.write(json.dumps(json_data, indent=4, sort_keys=True, ensure_ascii=False))
+        json.dump(json_data, f, encoding='utf-8', indent=4, sort_keys=True)
 
 
-def make_accession_json_list(filepath):
+def make_accession_json_list(filepath, donornumberid_to_aspace_id_map):
     json_for_each_accession = []
 
     accessions = load_accession_data_from_beal_export(filepath)
@@ -32,6 +39,7 @@ def make_accession_json_list(filepath):
         aspace_json.update(create_access_restriction_json(accession))
         aspace_json.update(create_external_document_json_entries(accession))
         aspace_json.update(create_classifications_json(accession))
+        aspace_json.update(create_donor_json(accession, donornumberid_to_aspace_id_map))
 
         # we may end up wanting to change the following method if/when ASpace re-implements processing status as a drop-down
         aspace_json.update(add_processing_status_to_general_note(accession, aspace_json))
@@ -39,6 +47,33 @@ def make_accession_json_list(filepath):
         json_for_each_accession.append(aspace_json)
 
     return json_for_each_accession
+
+def make_donornumberid_to_aspace_id_map(donornumberid_to_contactid_map, contactid_to_aspace_id_filepath):
+    donornumberid_to_aspace_id_map = {}
+
+    with open(contactid_to_aspace_id_filepath, 'r') as f:
+        contactid_to_aspace_id_map = json.load(f)
+
+    for donornumberid in donornumberid_to_contactid_map:
+        contactid = donornumberid_to_contactid_map[donornumberid]
+        if contactid in contactid_to_aspace_id_map:
+            donornumberid_to_aspace_id_map[donornumberid] = contactid_to_aspace_id_map[contactid]
+
+    return donornumberid_to_aspace_id_map
+
+
+def make_donornumberid_to_contactid_map(filepath):
+    donornumberid_to_contactid_map = {}
+
+    with open(filepath,'rb') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            donornumberid = row[0]
+            contactid = row[1]
+            if donornumberid and contactid:
+                donornumberid_to_contactid_map[donornumberid] = contactid
+
+    return donornumberid_to_contactid_map
 
 
 def add_processing_status_to_general_note(accession, aspace_json):
@@ -54,6 +89,19 @@ def add_processing_status_to_general_note(accession, aspace_json):
 
     return {"general_note": note}
 
+def create_donor_json(accession, donornumberid_to_aspace_id_map):
+    aspace_json = {}
+    agent_links = []
+    donornumberid = accession.get("DonorNumberID","")
+    if donornumberid:
+        aspace_id = donornumberid_to_aspace_id_map.get(donornumberid,"")
+        if aspace_id:
+            agent_links.append({"ref":aspace_id,'role':'source'})
+
+    if agent_links:
+        aspace_json["linked_agents"] = agent_links
+
+    return aspace_json
 
 def create_classifications_json(accession):
     aspace_json = {}
@@ -254,10 +302,15 @@ def normalize_donor_type(text):
 
 def load_accession_data_from_beal_export(filepath):
     with open(filepath, mode="r") as f:
-        reader = csv.DictReader(f)
+        reader = UnicodeDictReader(f)
         accessions = [row for row in reader]
 
     return accessions
+
+def UnicodeDictReader(utf8_data, **kwargs):
+    csv_reader = csv.DictReader(utf8_data, **kwargs)
+    for row in csv_reader:
+        yield {key: unicode(value, 'utf-8') for key, value in row.iteritems()}
 
 
 def is_disposition(accession):

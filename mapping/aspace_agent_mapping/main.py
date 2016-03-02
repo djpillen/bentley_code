@@ -11,8 +11,8 @@ from scripts.prepare_agents_for_aspace import prepare_agents
 # third-party libraries required: NLTK, tqdm, requests, nameparser
 
 # presets:
-ead_dir = r"C:\Users\djpillen\GitHub\without-reservations\Real_Masters_all"
-aspace_address = "http://141.211.39.87:8089"
+ead_dir = r"C:\Users\djpillen\GitHub\archivesspace_migration\eads"
+aspace_address = "http://localhost:8089"
 aspace_username = "admin"
 aspace_password = "admin"
 

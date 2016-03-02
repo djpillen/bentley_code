@@ -2,3 +2,5 @@
 local_to_aspace_agent_name_map.csv
 wonky_unitdate_display_candidates.csv
 skipped_items.csv
+json_data.json
+mapping/*/*.json

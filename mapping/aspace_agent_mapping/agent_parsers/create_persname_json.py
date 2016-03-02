@@ -62,9 +62,17 @@ def parse_persname(persname, auth="", source=""):
         suffix = u"sieur de"
         dates_string = u"fl. 17th cent"
 
+    if name.middle and not name.middle.endswith('.'):
+        name.middle = name.middle + '.'
+
     rest_of_name = u"{0} {1}".format(name.first, name.middle).rstrip()
     if rest_of_name == u"Christella D. Personal journey through South Africa. 1991":
         rest_of_name = u"Christella D."
+
+    non_terminating_middle_name = re.compile(r'[A-Za-z]+\s[A-Za-z\.]{1,3}[^\.]')
+
+    if non_terminating_middle_name.match(rest_of_name) and not rest_of_name.endswith('.'):
+        rest_of_name = rest_of_name += '.'
 
     # People with single-part names (like Keewaydinoquay) are mis-assigned. Have to fix those
     primary_name = name.last
