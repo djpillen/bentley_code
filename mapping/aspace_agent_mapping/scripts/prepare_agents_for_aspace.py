@@ -43,6 +43,8 @@ def normalize_name(name):
 
     normalized_name = name.replace("---", "- --")
     normalized_name = normalized_name.split("--")[0].strip()
+    if not normalized_name.endswith(".") and not normalized_name.endswith(")") and not normalized_name.endswith('-'):
+        normalized_name += "."
     return normalized_name
 
 

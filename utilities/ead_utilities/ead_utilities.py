@@ -58,7 +58,8 @@ class EADDir(object):
             else:
                 function(ead)
 
-            ead.prettyprint(output_dir)
+            with open(os.path.join(output_dir, ead_file),'w') as f:
+                f.write(etree.tostring(ead.tree, encoding='utf-8',xml_declaration=True, pretty_print=True))
 
     def characterize_dir(self, function):
         results = []

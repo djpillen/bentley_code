@@ -62,23 +62,27 @@ def parse_persname(persname, auth="", source=""):
         suffix = u"sieur de"
         dates_string = u"fl. 17th cent"
 
-    if name.middle and not name.middle.endswith('.'):
-        name.middle = name.middle + '.'
+    if name.middle and not birth_date and not death_date and not name.middle.endswith('.') and len(name.middle.replace(".","").replace(" ","")) < 2:
+        name.middle += "."
 
     rest_of_name = u"{0} {1}".format(name.first, name.middle).rstrip()
     if rest_of_name == u"Christella D. Personal journey through South Africa. 1991":
         rest_of_name = u"Christella D."
 
-    non_terminating_middle_name = re.compile(r'[A-Za-z]+\s[A-Za-z\.]{1,3}[^\.]')
+    non_terminating_middle_initials = re.compile(r'\s[\.\s]?[A-Za-z]$')
 
-    if non_terminating_middle_name.match(rest_of_name) and not rest_of_name.endswith('.'):
-        rest_of_name = rest_of_name += '.'
+    if non_terminating_middle_initials.search(rest_of_name) and not rest_of_name.endswith('.'):
+        rest_of_name += "."
 
     # People with single-part names (like Keewaydinoquay) are mis-assigned. Have to fix those
     primary_name = name.last
     if rest_of_name and not primary_name:
         primary_name = rest_of_name
         rest_of_name = ""
+
+    if rest_of_name and not birth_date and not death_date and not name.nickname and not suffix:
+        if not rest_of_name.endswith('.'):
+            rest_of_name += "."
 
     # create the parsed name dictionary
     name_parsed = {u"title": unicode(title),

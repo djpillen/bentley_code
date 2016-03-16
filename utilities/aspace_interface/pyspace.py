@@ -58,6 +58,17 @@ class PySpace (object):
     def add_person(self, person_json):
         return self.add_agent(agent_json=person_json, agent_type="people")
 
+    def get_agent(self, agent_uri):
+        url = "{0}{1}".format(self.host, agent_uri)
+        print url
+        return requests.get("{0}{1}".format(self.host, agent_uri), headers=self.headers_session_only).json()
+
+    def update_agent(self, agent_uri, agent_json):
+        url = "{0}{1}".format(self.host, agent_uri)
+        print url
+        pprint(agent_json)
+        return requests.post("{0}{1}".format(self.host, agent_uri), headers=self.headers_contentype_json, data=json.dumps(agent_json)).json()
+
     def get_all_object_ids(self, object_type):
         """
         acceptable object types:

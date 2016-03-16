@@ -1,4 +1,5 @@
 import json
+import pickle
 
 from scripts.add_aspace_agent_ids_to_eads import add_aspace_ids_to_all_agents_in_dir
 from scripts.get_agents_from_eads import get_all_agents
@@ -31,9 +32,12 @@ def main():
     # send these formatted entries to aspace and retrieve their new IDs
     local_name_to_aspace_id_map = post_agents_and_record_ids(prepped_agents, host=aspace_address, username=aspace_username, password=aspace_password)
 
+    with open("local_to_aspace_agent_name_map.p","wb") as pickle_out:
+        pickle.dump(local_name_to_aspace_id_map, pickle_out)
     # add these ids to our EAD files to map properly
     ead_path = ""
     add_aspace_ids_to_all_agents_in_dir(local_name_to_aspace_id_map, path_to_eads=ead_dir)
+
 
 
 if __name__ == "__main__":

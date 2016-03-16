@@ -167,6 +167,7 @@ def move_unitdates(unittitle_node, action):
     # if the action is to "move and calcify", leave the text but copy the tags
     if action == "move_and_calcify":
         new_unittitle = etree.fromstring(re.sub(tag_regex, '\g<1>', etree.tostring(unittitle_node)))
+        new_unittitle.attrib["altrender"] = "calcified"
 
     # otherwise the unitdates are just at the end of the tag -- remove them entirely and append after unittitle
     # also need to clean the remainder. This is tricky due to weirdness in lxml's ".text" function
