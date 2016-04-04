@@ -10,7 +10,7 @@ class PySpace (object):
         self.host = host
         self.repository = repository
 
-        auth_url = "{0}/users/{1}/login?password={2}".format(host, username, password)
+        auth_url = "{0}/users/{1}/login?password={2}&expiring=false".format(host, username, password)
         auth_json_response = requests.post(auth_url).json()
 
         self.session_id = auth_json_response["session"]
