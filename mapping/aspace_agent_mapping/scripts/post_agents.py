@@ -45,7 +45,8 @@ def return_posted_agent(agent_uri, host, username, password):
 def update_posted_agent(agent_uri, agent_json, host, username, password):
     pyspace = PySpace(host=host, username=username, password=password)
     response = pyspace.update_agent(agent_uri, agent_json)
-    print response
+    if not u"status" in response:
+        print response
 
 def extract_aspace_id(original_json, returned_json, pyspace):
     aspace_id = ""
@@ -53,7 +54,6 @@ def extract_aspace_id(original_json, returned_json, pyspace):
         return ""
     if u"status" in returned_json:
         aspace_id = returned_json[u"uri"]
-        pprint(returned_json)
     if u"error" in returned_json:
         error = returned_json[u'error']
         error = error.values() if type(error) == dict else [[error,],]
@@ -62,11 +62,13 @@ def extract_aspace_id(original_json, returned_json, pyspace):
                 return pyspace.retrieve_agent_uri_by_authority_id(original_json["names"][0]["authority_id"])
         except (AttributeError, TypeError):
             pprint(returned_json)
-            #exit()
         if u"conflicting_record" in returned_json[u"error"]:
             aspace_id = returned_json[u"error"][u"conflicting_record"][0]
+            print returned_json
         else:
-            print(returned_json)
+            pprint(returned_json)
+            pprint(original_json)
+            quit()
     return aspace_id
 
 

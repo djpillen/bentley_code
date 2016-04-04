@@ -1,3 +1,5 @@
+from vandura.config import ead_dir
+
 import csv
 import os
 import re
@@ -7,8 +9,8 @@ from lxml import etree
 from tqdm import tqdm
 
 
-input_dir = r"C:\Users\djpillen\GitHub\archivesspace_migration\eads"
-output_dir = r"C:\Users\djpillen\GitHub\archivesspace_migration\eads"
+input_dir = os.path.join(ead_dir, "eads")
+output_dir = os.path.join(ead_dir,"eads")
 
 
 def grab_suspects(input_dir):

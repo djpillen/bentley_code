@@ -31,8 +31,6 @@ def parse_corpname(string, authority_id="", source=""):
     if ' inc ' in primary_name or ' Inc ' in primary_name:
         primary_name = primary_name.replace(' inc ', ' inc. ').replace(' Inc ', ' Inc. ')
 
-    if primary_name.endswith('inc') or primary_name.endswith('Inc'):
-        primary_name = primary_name.replace(' inc', 'inc.').replace(' Inc',' Inc.')
 
     corpname_parsed = {u"primary_name":       unicode(primary_name),
                        u"subordinate_name_1": unicode(sub_name_1),

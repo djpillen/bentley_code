@@ -39,22 +39,26 @@ def main():
                 agent_uri = ead_agents_to_aspace_ids[full_name]
             except:
                 agent_uri = ead_agents_to_aspace_ids[full_name+"."]
-            print agent_uri
             person_json = return_posted_agent(agent_uri, host="http://localhost:8089", username="admin", password="admin")
             donor_detail = get_donor_detail(person)
+            contact_detail = get_contact_detail(person)
             beal_contact_id = donor_detail[u"beal_contact_id"]
             person_json["donor_details"].append(donor_detail)
+            person_json["agent_contacts"].append(contact_detail)
             person_json_data = json.dumps(person_json)
             update_posted_agent(agent_uri, person_json, host="http://localhost:8089", username="admin", password="admin")
             updated_agents_dict[beal_contact_id] = agent_uri
         elif name in agent_dict["persname"]:
             person_json = json.loads(agent_dict["persname"][name])
             donor_detail = get_donor_detail(person)
+            contact_detail = get_contact_detail(person)
             person_json["donor_details"].append(donor_detail)
+            person_json["agent_contacts"].append(contact_detail)
             agent_dict["persname"][name] = json.dumps(person_json)
         else:
             person_json = json.loads(Persname(name, "", "local").get_aspace_json())
             person_json.update(get_donor_details(person))
+            person_json.update(get_contact_details(person))
             agent_dict["persname"][name] = json.dumps(person_json)
 
     for corp in tqdm(corp_donor_data, desc="creating corp json data"):
@@ -68,20 +72,24 @@ def main():
                 agent_uri = ead_agents_to_aspace_ids[name+"."]
             corp_json = return_posted_agent(agent_uri, host="http://localhost:8089", username="admin", password="admin")
             donor_detail = get_donor_detail(corp)
+            contact_detail = get_contact_detail(corp)
             beal_contact_id = donor_detail[u"beal_contact_id"]
-            pprint(corp_json)
             corp_json["donor_details"].append(donor_detail)
+            corp_json["agent_contacts"].append(contact_detail)
             corp_json_data = json.dumps(corp_json)
             update_posted_agent(agent_uri, corp_json, host="http://localhost:8089", username="admin", password="admin")
             updated_agents_dict[beal_contact_id] = agent_uri
         elif name in agent_dict["corpname"]:
             corp_json = json.loads(agent_dict["corpname"][name])
             donor_detail = get_donor_detail(corp)
+            contact_detail = get_contact_detail(corp)
             corp_json["donor_details"].append(donor_detail)
+            corp_json["agent_contacts"].append(contact_detail)
             agent_dict["corpname"][name] = json.dumps(corp_json)
         else:
             corp_json = json.loads(Corpname(name, "", "local").get_aspace_json())
             corp_json.update(get_donor_details(corp))
+            corp_json.update(get_contact_details(corp))
             agent_dict["corpname"][name] = json.dumps(corp_json)
 
     ids = post_donors_and_record_ids(agent_dict, host="http://localhost:8089", username="admin", password="admin")
@@ -101,10 +109,14 @@ def get_donor_details(donor_data):
     #if donor_part and donor_number:
         #donor_number += "-{}".format(donor_part)
 
+    return {u"donor_details": [get_donor_detail(donor_data)]}
+
+    """
     return {u"donor_details": [{u"donor_number": donor_number,
                                 u"donor_number_auto_generate": False,
-                               u"dart_id": dart_id,
-                               u"beal_contact_id": contact_id}]}
+                                u"dart_id": dart_id,
+                                u"beal_contact_id": contact_id}]}
+    """
 
 def get_donor_detail(donor_data):
     donor_number = donor_data.get("donor number", "")
@@ -112,17 +124,74 @@ def get_donor_detail(donor_data):
     contact_id = donor_data.get("contact id", "")
     dart_id = donor_data.get("bhl dart id", "")
 
-    return {u'donor_number': donor_number,
-            u'donor_number_auto_generate': False,
-            u'dart_id': dart_id,
-            u'beal_contact_id': contact_id}
+    return {u"donor_number": donor_number,
+            u"donor_number_auto_generate": False,
+            u"dart_id": dart_id,
+            u"beal_contact_id": contact_id}
 
+def get_contact_details(donor_data):
+    contact_id = donor_data.get("contact id", "")
+    full_name = donor_data.get("full name","No contact name provided")
+    address_1 = donor_data.get("address", "")
+    address_2 = donor_data.get("address 2", "")
+    city = donor_data.get("city", "")
+    country = donor_data.get("country", "")
+    email = donor_data.get("email", "")
+    post_code = donor_data.get("zip code", "")
+    state = donor_data.get("state", "")
+
+    phone_type = donor_data.get("phone type", "")
+    phone_number = donor_data.get("phone number", "")
+
+    note = donor_data.get("note", "")
+    note += "\n[Contact info for BEAL contact id {}]".format(contact_id)
+
+    return {u"agent_contacts": [get_contact_detail(donor_data)]}
+
+def get_contact_detail(donor_data):
+    contact_id = donor_data.get("contact id", "")
+    full_name = donor_data.get("full name","No contact name provided")
+    address_1 = donor_data.get("address", "")
+    address_2 = donor_data.get("address 2", "")
+    city = donor_data.get("city", "")
+    country = donor_data.get("country", "")
+    email = donor_data.get("email", "")
+    post_code = donor_data.get("zip", "")
+    state = donor_data.get("state", "")    
+
+    phone_type = donor_data.get("phone type", "").lower()
+    phone_number = donor_data.get("phone number", "")
+    phone_extension = ""
+
+    if phone_type == "work":
+        phone_type = "business"
+    if phone_type == "xxx":
+        phone_type = ""
+    if phone_type == "farm":
+        phone_type = "home"
+        phone_extension = "[farm]"
+
+    if phone_type and not phone_number:
+        phone_type = ""    
+
+    note = donor_data.get("note", "")
+    note += "\n[Contact info for BEAL Contact ID {}]".format(contact_id)
+
+    return {u"name": full_name,
+            u"address_1":address_1,
+            u"address_2": address_2,
+            u"city": city,
+            u"country":country,
+            u"email":email,
+            u"post_code":post_code,
+            u"region":state,
+            u"note":note.strip(),
+            u"telephones": [{u"number_type":phone_type, u"number": phone_number,u"ext":phone_extension}]}
 
 def load_donor_data(filepath):
     with open(filepath, mode="r") as f:
         reader = UnicodeDictReader(f, delimiter="\t")
         return list(reader)
-
 
 def extract_agents(donor_data):
     corporations = []
@@ -164,7 +233,8 @@ def convert_to_utf8_and_add_headers(filename):
     name, extension = filename.split(".")
     with open("{}_clean.{}".format(name, extension), mode="wb") as f:
         headers = ["contact id", "bhl dart id", "suffix", "first name", "middle name", "last name", "title",
-                   "organization", "note", "status", "donor number", "donor part", "folder status"]
+                   "organization", "note", "status", "donor number", "donor part", "folder status",
+                   "address", "address 2", "city", "state", "zip", "country", "email", "phone type", "phone number", "full name"]
         f.write("\t".join(headers) + "\n")
         f.write(data)
 

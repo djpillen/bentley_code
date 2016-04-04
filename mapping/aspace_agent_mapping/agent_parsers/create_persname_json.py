@@ -142,7 +142,7 @@ def extract_birth_death_dates(string):
 
         if len(dates) == 1:
             string = re.sub(regex, "", string)
-            string = string.replace(" ca.", "").rstrip(" ,")
+            string = string.replace(" ca.", "").replace(", ,",",").rstrip(" ,")
             birth_date, death_date = dates[0]
             break
 

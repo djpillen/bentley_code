@@ -12,7 +12,7 @@ from scripts.prepare_agents_for_aspace import prepare_agents
 # third-party libraries required: NLTK, tqdm, requests, nameparser
 
 # presets:
-ead_dir = r"C:\Users\djpillen\GitHub\archivesspace_migration\eads"
+ead_dir = r"C:\Users\djpillen\GitHub\archivesspace_migration\EAD\eads"
 aspace_address = "http://localhost:8089"
 aspace_username = "admin"
 aspace_password = "admin"

@@ -108,7 +108,7 @@ def create_classifications_json(accession):
     classifications = []
     processing_status = accession.get("ProcessingStatus", "") or ""
     if processing_status == "RCS":
-        classifications.append({"ref": "/repositories/2/classifications/3"})
+        classifications.append({"ref": "/repositories/2/classifications/4"})
 
     classification_type = normalize_unit(accession["Unit"])
 
