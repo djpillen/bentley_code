@@ -13,7 +13,7 @@ def post_agents_and_record_ids(session, aspace_url, agent_dict):
         for name, json_data in tqdm(agent_dct.items(), desc="posting {}s...".format(agent_type)):
             aspace_agent_type = normalize_agent_type(agent_type)
             response = session.post("{0}/agents/{1}".format(aspace_url, aspace_agent_type), data=json_data).json()
-            name_to_aspace_ids_map[unicode(name)] = unicode(extract_aspace_id(json_data, response, aspace_url))
+            name_to_aspace_ids_map[unicode(name)] = unicode(extract_aspace_id(session, json_data, response, aspace_url))
 
     return name_to_aspace_ids_map
 
@@ -29,7 +29,7 @@ def post_donors_and_record_ids(session, aspace_url, agent_dict):
             for donor_detail in agent_json["donor_details"]:
                 contact_ids.append(donor_detail["beal_contact_id"])
             response = session.post("{0}/agents/{1}".format(aspace_url, aspace_agent_type), data=json_data).json()
-            aspace_id = unicode(extract_aspace_id(json_data, response, aspace_url))
+            aspace_id = unicode(extract_aspace_id(session, json_data, response, aspace_url))
             for contact_id in contact_ids:
                 name_to_aspace_ids_map[contact_id] = aspace_id
 
@@ -49,7 +49,7 @@ def update_posted_agent(session, aspace_url, agent_uri, agent_json):
     if not u"status" in response:
         print response
 
-def extract_aspace_id(original_json, returned_json, aspace_url):
+def extract_aspace_id(session, original_json, returned_json, aspace_url):
     aspace_id = ""
     if not returned_json:
         return ""
@@ -65,7 +65,6 @@ def extract_aspace_id(original_json, returned_json, aspace_url):
             pprint(returned_json)
         if u"conflicting_record" in returned_json[u"error"]:
             aspace_id = returned_json[u"error"][u"conflicting_record"][0]
-            print returned_json
         else:
             pprint(returned_json)
             pprint(original_json)

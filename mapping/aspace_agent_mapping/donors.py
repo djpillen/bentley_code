@@ -1,5 +1,5 @@
-from vagrant.config import accessions_dir
-from vagrant.shared.scripts.archivesspace_authenticate import authenticate
+from vandura.config import accessions_dir
+from vandura.shared.scripts.archivesspace_authenticate import authenticate
 
 import csv
 import getpass
@@ -22,8 +22,8 @@ def main():
     password = getpass.getpass("Password:")
     session = authenticate(aspace_url, username, password)
     print("loading data...")
-    convert_to_utf8_and_add_headers(join(accessions_dir, "donors.tab"))
-    donor_data = load_donor_data(join(accessions_dir, "donor_records_clean.tab"))
+    convert_to_utf8_and_add_headers(join(accessions_dir, "beal_exports", "donor_records.tab"))
+    donor_data = load_donor_data(join(accessions_dir, "beal_exports", "donor_records_clean.tab"))
 
     ead_agents_to_aspace_ids_file = 'local_to_aspace_agent_name_map.p'
     ead_agents_to_aspace_ids = pickle.load(open(ead_agents_to_aspace_ids_file))

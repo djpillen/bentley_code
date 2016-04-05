@@ -9,8 +9,8 @@ from scripts.get_agents_from_eads import get_all_agents
 from scripts.post_agents import post_agents_and_record_ids
 from scripts.prepare_agents_for_aspace import prepare_agents
 
-from vagrant.shared.scripts.archivesspace_authenticate import authenticate
-from vagrant.config import ead_dir
+from vandura.shared.scripts.archivesspace_authenticate import authenticate
+from vandura.config import ead_dir
 
 # code to extract agents from EADs, post them to an ASpace instance, then write the new ASpace
 # references for each agent back to the EAD files
