@@ -106,7 +106,7 @@ def main():
     for contact_id in updated_agents_dict:
         ids[contact_id] = updated_agents_dict[contact_id]
 
-    with open("donor_name_to_aspace_id_map.json", mode="w") as f:
+    with open(join(accessions_dir, "json", "donor_name_to_aspace_id_map.json", mode="w") as f:
         json.dump(ids, f, ensure_ascii=False, indent=4, sort_keys=True)
 
     session.post("{}/logout".format(aspace_url))

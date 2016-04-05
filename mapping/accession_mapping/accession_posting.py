@@ -1,29 +1,33 @@
+from vandura.config import accessions_dir
+from vandura.shared.scripts.archivesspace_authenticate import authenticate
+
+import getpass
 import json
+from os.path import join
 from pprint import pprint
+import requests
 
 from tqdm import tqdm
 
-from utilities.aspace_interface.pyspace import PySpace
+aspace_url = "http://localhost:8089"
+username = "admin"
+password = getpass.getpass("Password:")
+s = authenticate(aspace_url, username, password)
+s.headers.update({"Content-type":"application/json"})
 
-pyspace = PySpace(host="http://localhost:8089", repository="2", username="admin", password="admin")
-
-'''
-print("adding required enumerated values...")
-pyspace.add_values_to_enum(55, ["on file", "pending", "sent", "n/a", "other"])
-pyspace.add_values_to_enum(14, ["linear feet", "MB", "GB", "KB", "TB"])
-
-
-print("adding classifications for MHC, UARP, and RCS...")
-pyspace.add_classification('Michigan Historical Collections', 'MHC')
-pyspace.add_classification('University Archives and Records Program', 'UARP')
-pyspace.add_classification('Records Center Storage', 'RCS')
-'''
-
+json_data_file = join(accessions_dir, "json", "json_data.json")
 with open("json_data.json", mode="r") as f:
     json_data = json.load(f)
 
 
 for accession_json in tqdm(json_data, desc="posting accessions...", leave=True):
-    response = pyspace.add_accession(accession_json)
+	if type(accession_json) == str:
+            accession_json = json.loads(accession_json)
+
+    response = s.post("{0}/repositories/2/accessions".format(aspace_url),
+                         data=json.dumps(accession_json)
+                         ).json()
+
     if "invalid_object" in response:
         pprint(json.dumps(response))
+        quit()

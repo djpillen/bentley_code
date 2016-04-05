@@ -1,3 +1,5 @@
+from vandura.config import accessions_dir
+
 import csv
 import json
 import re
@@ -6,12 +8,12 @@ from tqdm import tqdm
 
 def main():
     # CHANGE THIS
-    input_filepath = "C:/Users/djpillen/GitHub/accessions/accessions_20160226-final.csv"
+    input_filepath = join(accessions_dir, "beal_exports", "accessions_20160226-final.csv")
 
-    donornumberid_to_contactid_filepath = 'C:/Users/djpillen/GitHub/accessions/DonorNumberID_to_ContactID.csv'
+    donornumberid_to_contactid_filepath = join(accessions_dir, "beal_exports", "DonorNumberID_to_ContactID.csv")
     donornumberid_to_contactid_map = make_donornumberid_to_contactid_map(donornumberid_to_contactid_filepath)
 
-    contactid_to_aspace_id_filepath = 'C:/Users/djpillen/GitHub/bentley_code/mapping/aspace_agent_mapping/donor_name_to_aspace_id_map.json'
+    contactid_to_aspace_id_filepath = join(accessions_dir, "json", "donor_name_to_aspace_id_map.json")
 
     donornumberid_to_aspace_id_map = make_donornumberid_to_aspace_id_map(donornumberid_to_contactid_map, contactid_to_aspace_id_filepath)
 
@@ -19,7 +21,7 @@ def main():
 
     json_data = make_accession_json_list(clean_filename, donornumberid_to_aspace_id_map)
 
-    with open("json_data.json", mode="w") as f:
+    with open(join(accessions_dir, "json", "json_data.json"), mode="w") as f:
         json.dump(json_data, f, encoding='utf-8', indent=4, sort_keys=True)
 
 
