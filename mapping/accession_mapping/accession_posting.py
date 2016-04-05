@@ -31,3 +31,5 @@ for accession_json in tqdm(json_data, desc="posting accessions...", leave=True):
     if "invalid_object" in response:
         pprint(json.dumps(response))
         quit()
+
+s.post("{}/logout".format(aspace_url))
